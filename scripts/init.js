@@ -1,5 +1,5 @@
 function importTemplates() {
-    $.ajax({
+    /*$.ajax({
         url: "station",
         success: function(data){
             let stations = [];
@@ -12,7 +12,10 @@ function importTemplates() {
                 stations.push(stationName);
             }).promise().done(loadStations(stations));
         }
-    });
+    });*/
+
+    let stations = ['MCM', 'Ranzmusik', 'rAIdo'];
+    loadStations(stations);
 }
 
 // In externen Funktion durchlaufen, da sonst die korrekte Reihenfolge nicht gegegeben ist und das Thumbnail nicht zum Inhalt passen könnte
