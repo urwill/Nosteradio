@@ -1,0 +1,37 @@
+#stationContainer {
+	width: 960px;
+}
+
+.carousel-indicators button.thumbnail {
+    width: 200px;
+    height: 112.5px;
+	background-color: #eee !important;
+  }
+  .carousel-indicators button.thumbnail:not(.active) {
+    opacity: 0.7;
+  }
+  .carousel-indicators {
+    position: static;
+  }
+  /*@media screen and (min-width: 992px) {
+    .carousel {
+      max-width: 70%;
+      margin: 0 auto;
+    }
+  }*/
+  
+  .carousel-control-prev {
+    margin-left: -3%;    /* Neben das Banner positionieren */
+    margin-top: -112.5px;   /* Nach oben verschieben, um die Thumbnails auszugleichen */
+  }
+  
+  .carousel-control-next {
+    margin-right: -3%;    /* Neben das Banner positionieren */
+    margin-top: -112.5px;   /* Nach oben verschieben, um die Thumbnails auszugleichen */
+  }
+
+/* Die Farben von selbst erstellten Icons im Darkmode invertieren, da das nicht automatisch geschieht, wie bei Font Awesome Icons */
+/* Wird momentan nicht benötigt
+body[data-bs-theme="dark"] .icon {
+  filter: invert(100%);
+}*/

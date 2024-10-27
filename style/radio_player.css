@@ -1,0 +1,16 @@
+.radio-title {
+    font-family: "Times New Roman", Times, serif;
+}
+
+#stationCarouselInner {
+    background-color: #ffa500;
+    color: #000;
+    border: 1rem solid #000;
+    border-radius: 5%;
+    padding: 5%;
+}
+
+.playerControl {
+    font-size: 2rem;
+    cursor: pointer;
+}

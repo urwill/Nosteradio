@@ -1,0 +1,36 @@
+<div class="carousel-item {#firstItem}active{/firstItem}">
+    <div class="container-fluid text-center">
+        <div class="row">
+            <div class="col">
+                <img src="station/{stationName}/banner.png" class="d-block w-100" alt="MCM">
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col">
+                <h1 id="stationTitle" class="radio-title">{stationName}</h1>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col">
+                <h4 id="currentSong" class="radio-title">Loading...</h4>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-5">
+            <div class="col-auto">
+                <i id="rewindIcon" class="playerControl bi bi-rewind-fill"></i>
+            </div>
+            <div class="col-auto">
+                <i id="playIcon" class="playerControl bi bi-play-fill"></i>
+            </div>
+            <div class="col-auto">
+                <i id="forwardIcon" class="playerControl bi bi-fast-forward-fill"></i>
+            </div>
+            <div class="col-auto">
+                <i id="volumeIcon" class="playerControl bi bi-volume-down-fill"></i>
+            </div>
+            <div class="col-auto d-flex align-items-center">
+                <input type="range" id="volumeSlider" min="0" max="100" value="50" style="width: 100px;">
+            </div>
+        </div>
+    </div>
+</div>
