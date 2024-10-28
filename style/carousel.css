@@ -35,3 +35,7 @@
 body[data-bs-theme="dark"] .icon {
   filter: invert(100%);
 }*/
+
+.carousel .carousel-item {
+  transition-duration: 0.3s;
+}

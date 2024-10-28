@@ -50,18 +50,29 @@ function onYoutubePlayerReady(event) {
     const rewindIcons = document.querySelectorAll('#rewindIcon');
     for(const rewindIcon of rewindIcons) {
         rewindIcon.addEventListener("click", function() {
-            const currentVideoId = getYouTubeVideoId(youtubePlayer.getVideoUrl());
-            songQueue = JSON.parse(JSON.stringify(songQueueOrig));  // Original-Queue auf aktuelle Queue übertragen ohne Referenz auf das Original
+            const currentTime = youtubePlayer.getCurrentTime();
+            if(currentTime > 2) {   // Wenn der Song schon länger als 2 Sekunden läuft, an den Anfang springen
+                youtubePlayer.seekTo(0);
+            } else {    // Ansonsten vorherigen Song starten
+                const currentVideoId = getYouTubeVideoId(youtubePlayer.getVideoUrl());
+                songQueue = JSON.parse(JSON.stringify(songQueueOrig));  // Original-Queue auf aktuelle Queue übertragen ohne Referenz auf das Original
 
-            while(songQueue.length > 1) {
-                if(songQueue[1] === currentVideoId) {
+                if(songQueue[0] === currentVideoId) {   // aktuell läuft der erste Song
+                    songQueue = songQueue.slice(-1);  // letzten Song auswählen
                     startNextSong();
                     return;
+                } else {
+                    while(songQueue.length > 1) {
+                        if(songQueue[1] === currentVideoId) {
+                            startNextSong();
+                            return;
+                        }
+                        songQueue.shift();
+                    }
+    
+                    alert('Vorherigen Song nicht gefunden.')
                 }
-                songQueue.shift();
             }
-
-            alert('Vorherigen Song nicht gefunden.')
         });
     }
 
@@ -88,6 +99,9 @@ function onYoutubePlayerReady(event) {
             }
 
             youtubePlayer.setVolume(volume);
+            if(volume > 0) {
+                youtubePlayer.unMute();   // Player wieder unmuten, falls er beim Songwechsel gemutet und wegen User-Einstellungen nicht entmutet wurde
+            }
 
             switch (true) {
                 case (volume === 0):
@@ -137,6 +151,10 @@ function onYoutubePlayerStateChange(event) {
 		case YT.PlayerState.PLAYING:
             if(isPaused) {
                 event.target.pauseVideo();
+            } else {
+                if(!document.querySelectorAll('#volumeIcon')[0].classList.contains('bi-volume-mute-fill')) {
+                    youtubePlayer.unMute();   // Player wieder unmuten, wenn er nicht durch den User gemutet wurde
+                }
             }
             if(!videoStarted) {
                 videoStarted = true;
@@ -148,6 +166,9 @@ function onYoutubePlayerStateChange(event) {
             }
 			break;
 		case YT.PlayerState.PAUSED:
+            if(!document.querySelectorAll('#volumeIcon')[0].classList.contains('bi-volume-mute-fill')) {
+                youtubePlayer.unMute();   // Player wieder unmuten, wenn pausiert wurde und nicht durch den User gemutet wurde
+            }
             for(const playIcon of playIcons) {
                 playIcon.classList.remove('bi-pause-fill');
                 playIcon.classList.add('bi-play-fill');
@@ -167,14 +188,17 @@ function onYoutubePlayerError(event) {
 	
 }
 
-function startNextSong() {
+function startNextSong(timeStamp = 0) {
     if(songQueue.length > 0) {
         const videoId = songQueue.shift();
         videoStarted = false;
-        youtubePlayer.loadVideoById(videoId);
+        youtubePlayer.mute();   // Player muten, damit im pausierten Zustand der Song nicht erst kurz beginnt bevor er pausiert wird
+        youtubePlayer.loadVideoById(videoId, timeStamp);
     } else {
         //alert('Radio leer');
-        nextStation();
+        //nextStation();
+        songQueue = JSON.parse(JSON.stringify(songQueueOrig));  // Original-Queue auf aktuelle Queue übertragen ohne Referenz auf das Original
+        startNextSong();
     }
 }
 

@@ -4,9 +4,10 @@
 
 #stationCarouselInner {
     background-color: #ffa500;
+    background-image: url("../images/purty_wood.webp");
     color: #000;
-    border: 1rem solid #000;
-    border-radius: 5%;
+    border: 0.7rem solid #000;
+    border-radius: 100px;
     padding: 5%;
 }
 
