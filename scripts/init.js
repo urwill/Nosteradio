@@ -63,6 +63,8 @@ async function loadStations(stations) {
             alert(`Songliste von ${station} konnte nicht geladen werden.`)
         });
     }
+
+    await fetchAndInsertHtml('./html/controls.html', {}, document.getElementById('stationCarouselInner'));
 }
 
 // Eine Funktion, die eine HTML-Datei holt und einfügt

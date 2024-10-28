@@ -20,3 +20,10 @@
     width: 100px;
     accent-color: #000;
 }
+
+.stationCarouselControlsStatic {
+    /*border: 1px solid #000;*/
+    width: 90%;
+    position: absolute;
+    bottom: 6%;
+}

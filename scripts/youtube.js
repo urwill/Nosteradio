@@ -34,125 +34,100 @@ function onYoutubePlayerReady(event) {
         startNextSong();
     }
 
-    const playIcons = document.querySelectorAll('#playIcon');
-    for(const playIcon of playIcons) {
-        playIcon.addEventListener("click", function() {
-            if(this.classList.contains('bi-play-fill')) {
-                isPaused = false;
-                youtubePlayer.playVideo();
+    const playIcon = document.getElementById('playIcon');
+    playIcon.addEventListener("click", function() {
+        if(this.classList.contains('bi-play-fill')) {
+            isPaused = false;
+            youtubePlayer.playVideo();
+        } else {
+            isPaused = true;
+            youtubePlayer.pauseVideo();
+        }
+    });
+
+    const rewindIcon = document.getElementById('rewindIcon');
+    rewindIcon.addEventListener("click", function() {
+        const currentTime = youtubePlayer.getCurrentTime();
+        if(currentTime > 2) {   // Wenn der Song schon länger als 2 Sekunden läuft, an den Anfang springen
+            youtubePlayer.seekTo(0);
+        } else {    // Ansonsten vorherigen Song starten
+            const currentVideoId = getYouTubeVideoId(youtubePlayer.getVideoUrl());
+            songQueue = JSON.parse(JSON.stringify(songQueueOrig));  // Original-Queue auf aktuelle Queue übertragen ohne Referenz auf das Original
+
+            if(songQueue[0] === currentVideoId) {   // aktuell läuft der erste Song
+                songQueue = songQueue.slice(-1);  // letzten Song auswählen
+                startNextSong();
+                return;
             } else {
-                isPaused = true;
-                youtubePlayer.pauseVideo();
-            }
-        });
-    }
-
-    const rewindIcons = document.querySelectorAll('#rewindIcon');
-    for(const rewindIcon of rewindIcons) {
-        rewindIcon.addEventListener("click", function() {
-            const currentTime = youtubePlayer.getCurrentTime();
-            if(currentTime > 2) {   // Wenn der Song schon länger als 2 Sekunden läuft, an den Anfang springen
-                youtubePlayer.seekTo(0);
-            } else {    // Ansonsten vorherigen Song starten
-                const currentVideoId = getYouTubeVideoId(youtubePlayer.getVideoUrl());
-                songQueue = JSON.parse(JSON.stringify(songQueueOrig));  // Original-Queue auf aktuelle Queue übertragen ohne Referenz auf das Original
-
-                if(songQueue[0] === currentVideoId) {   // aktuell läuft der erste Song
-                    songQueue = songQueue.slice(-1);  // letzten Song auswählen
-                    startNextSong();
-                    return;
-                } else {
-                    while(songQueue.length > 1) {
-                        if(songQueue[1] === currentVideoId) {
-                            startNextSong();
-                            return;
-                        }
-                        songQueue.shift();
+                while(songQueue.length > 1) {
+                    if(songQueue[1] === currentVideoId) {
+                        startNextSong();
+                        return;
                     }
-    
-                    alert('Vorherigen Song nicht gefunden.')
+                    songQueue.shift();
                 }
+
+                alert('Vorherigen Song nicht gefunden.')
             }
-        });
-    }
+        }
+    });
 
-    const forwardIcons = document.querySelectorAll('#forwardIcon');
-    for(const forwardIcon of forwardIcons) {
-        forwardIcon.addEventListener("click", function() {
-            startNextSong();
-        });
-    }
+    const forwardIcon = document.getElementById('forwardIcon');
+    forwardIcon.addEventListener("click", function() {
+        startNextSong();
+    });
 
-    const volumeSliders = document.querySelectorAll('#volumeSlider');
-    const volumeIcons = document.querySelectorAll('#volumeIcon');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeIcon = document.getElementById('volumeIcon');
+    const initialVolume = 50;
+    volumeSlider.value = initialVolume;
+    
+    // Ändern der Lautstärke, wenn der Slider bewegt wird
+    volumeSlider.addEventListener('input', function() {
+        let volume = parseInt(this.value);
 
-    for(const volumeSlider of volumeSliders) {
-        const initialVolume = 50;
-        volumeSlider.value = initialVolume;
-        
-        // Ändern der Lautstärke, wenn der Slider bewegt wird
-        volumeSlider.addEventListener('input', function() {
-            let volume = parseInt(this.value);
+        youtubePlayer.setVolume(volume);
+        if(volume > 0) {
+            youtubePlayer.unMute();   // Player wieder unmuten, falls er beim Songwechsel gemutet und wegen User-Einstellungen nicht entmutet wurde
+        }
 
-            for(const volumeSlider of volumeSliders) {
-                volumeSlider.value = volume;    // Wert an die Slider in den anderen Carousel Tabs übertragen
-            }
-
-            youtubePlayer.setVolume(volume);
-            if(volume > 0) {
-                youtubePlayer.unMute();   // Player wieder unmuten, falls er beim Songwechsel gemutet und wegen User-Einstellungen nicht entmutet wurde
-            }
-
-            switch (true) {
-                case (volume === 0):
-                    for(const volumeIcon of volumeIcons) {
-                        volumeIcon.className = 'playerControl bi bi-volume-mute-fill';
-                    }
-                    break;
-                case (volume > 50):
-                    for(const volumeIcon of volumeIcons) {
-                        volumeIcon.className = 'playerControl bi bi-volume-up-fill';
-                    }
-                    break;
-                default:
-                    for(const volumeIcon of volumeIcons) {
-                        volumeIcon.className = 'playerControl bi bi-volume-down-fill';
-                    }
-                    break;
-            }
-        });
-    }
+        switch (true) {
+            case (volume === 0):
+                volumeIcon.className = 'playerControl bi bi-volume-mute-fill';
+                break;
+            case (volume > 50):
+                volumeIcon.className = 'playerControl bi bi-volume-up-fill';
+                break;
+            default:
+                volumeIcon.className = 'playerControl bi bi-volume-down-fill';
+                break;
+        }
+    });
 
 	// Mute/Unmute, wenn man auf das Icon klickt
-    for(const volumeIcon of volumeIcons) {
-        volumeIcon.addEventListener('click', function() {
-            let volume = parseInt(volumeSliders[0].value);
-            
-            if(volume === 0) {
-                for(const volumeSlider of volumeSliders) {
-                    volumeSlider.value = volumeSlider.oldvalue;
-                }
-            } else {
-                for(const volumeSlider of volumeSliders) {
-                    volumeSlider.oldvalue = volume;
-                    volumeSlider.value = 0;
-                }
-            }
+    volumeIcon.addEventListener('click', function() {
+        let volume = parseInt(volumeSlider.value);
+        
+        if(volume === 0) {
+            volumeSlider.value = volumeSlider.oldvalue;
+        } else {
+            volumeSlider.oldvalue = volume;
+            volumeSlider.value = 0;
+        }
 
-            volumeSliders[0].dispatchEvent(new Event('input'));
-        });
-    }
+        volumeSlider.dispatchEvent(new Event('input'));
+    });
 }
 
 function onYoutubePlayerStateChange(event) {
-    const playIcons = document.querySelectorAll('#playIcon');
+    const playIcon = document.getElementById('playIcon');
 
 	switch(event.data) {
 		case YT.PlayerState.PLAYING:
             if(isPaused) {
                 event.target.pauseVideo();
             } else {
-                if(!document.querySelectorAll('#volumeIcon')[0].classList.contains('bi-volume-mute-fill')) {
+                if(!document.getElementById('volumeIcon').classList.contains('bi-volume-mute-fill')) {
                     youtubePlayer.unMute();   // Player wieder entmuten, wenn er nicht durch den User gemutet wurde
                 }
             }
@@ -160,28 +135,22 @@ function onYoutubePlayerStateChange(event) {
                 videoStarted = true;
                 setSongTitle(event.target.getVideoData());
             }
-            for(const playIcon of playIcons) {
-                playIcon.classList.remove('bi-play-fill');
-                playIcon.classList.add('bi-pause-fill');
-            }
+            playIcon.classList.remove('bi-play-fill');
+            playIcon.classList.add('bi-pause-fill');
 			break;
 		case YT.PlayerState.PAUSED:
-            if(!document.querySelectorAll('#volumeIcon')[0].classList.contains('bi-volume-mute-fill')) {
+            if(!document.getElementById('volumeIcon').classList.contains('bi-volume-mute-fill')) {
                 setTimeout(() => {  // Song ist noch nicht wirklich pausiert. Also mit Delay entmuten, damit beim Songwechsel nichts zu hören ist, wenn eigentlich pausiert ist
                     youtubePlayer.unMute();   // Player wieder entmuten, wenn pausiert wurde und nicht durch den User gemutet wurde
                 }, 100);
                 
             }
-            for(const playIcon of playIcons) {
-                playIcon.classList.remove('bi-pause-fill');
-                playIcon.classList.add('bi-play-fill');
-            }
+            playIcon.classList.remove('bi-pause-fill');
+            playIcon.classList.add('bi-play-fill');
 			break;
 		case YT.PlayerState.ENDED:
-            /*for(const playIcon of playIcons) {
-                playIcon.classList.remove('bi-pause-fill');
-                playIcon.classList.add('bi-play-fill');
-            }*/
+            /*playIcon.classList.remove('bi-pause-fill');
+            playIcon.classList.add('bi-play-fill');*/
             startNextSong();
 			break;
 	}
