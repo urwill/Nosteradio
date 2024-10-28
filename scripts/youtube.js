@@ -153,7 +153,7 @@ function onYoutubePlayerStateChange(event) {
                 event.target.pauseVideo();
             } else {
                 if(!document.querySelectorAll('#volumeIcon')[0].classList.contains('bi-volume-mute-fill')) {
-                    youtubePlayer.unMute();   // Player wieder unmuten, wenn er nicht durch den User gemutet wurde
+                    youtubePlayer.unMute();   // Player wieder entmuten, wenn er nicht durch den User gemutet wurde
                 }
             }
             if(!videoStarted) {
@@ -167,7 +167,10 @@ function onYoutubePlayerStateChange(event) {
 			break;
 		case YT.PlayerState.PAUSED:
             if(!document.querySelectorAll('#volumeIcon')[0].classList.contains('bi-volume-mute-fill')) {
-                youtubePlayer.unMute();   // Player wieder unmuten, wenn pausiert wurde und nicht durch den User gemutet wurde
+                setTimeout(() => {  // Song ist noch nicht wirklich pausiert. Also mit Delay entmuten, damit beim Songwechsel nichts zu hören ist, wenn eigentlich pausiert ist
+                    youtubePlayer.unMute();   // Player wieder entmuten, wenn pausiert wurde und nicht durch den User gemutet wurde
+                }, 100);
+                
             }
             for(const playIcon of playIcons) {
                 playIcon.classList.remove('bi-pause-fill');
