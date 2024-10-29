@@ -166,9 +166,6 @@ function onYoutubePlayerStateChange(event) {
             playIcon.classList.add('bi-play-fill');*/
             startNextSong();
 			break;
-        case YT.PlayerState.UNDEFINED:
-            alert('Werbung');
-            break;
 	}
 }
 
