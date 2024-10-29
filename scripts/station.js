@@ -8,7 +8,7 @@ function startStation(station) {
 
     const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
     if (stationObject) {
-        for(song of stationObject.stationSongs) {
+        for(const song of stationObject.stationSongs) {
             songQueue.push(getYouTubeVideoId(song.url));
             songQueueOrig.push(getYouTubeVideoId(song.url));
         }
@@ -47,7 +47,7 @@ function setSongTitle(videoData) {
 
     const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
     if (stationObject) {
-        for(song of stationObject.stationSongs) {
+        for(const song of stationObject.stationSongs) {
             if(getYouTubeVideoId(song.url) === videoData.video_id) {
                 let artist = song.artist;
                 if(!artist) {

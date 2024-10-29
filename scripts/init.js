@@ -68,7 +68,7 @@ async function loadStations(stations) {
         }
     }
 
-    await fetchAndInsertHtml('./html/controls.html', {}, document.getElementById('stationCarouselInner'));
+    await fetchAndInsertHtml('./html/controls.html', {isLocal: isLocal}, document.getElementById('stationCarouselInner'));
     initYoutubePlayer();
 }
 
