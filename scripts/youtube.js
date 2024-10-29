@@ -30,8 +30,17 @@ function onYouTubeIframeAPIReady() {
 
 function onYoutubePlayerReady(event) {
     youtubePlayerLoaded = true;
-    if(stationLoaded) {
-        startNextSong();
+
+    let station = getLocalStorageItem('activeStation');
+    if(station) {
+        const carousel = new bootstrap.Carousel('#stationCarousel');
+        const index = arrStations.findIndex(stationObj => stationObj.stationName === station);
+        carousel.to(index);
+
+    } else {
+        const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
+        station = activeSlide.querySelector('#stationTitle').innerHTML;
+        startStation(station);
     }
 
     const playIcon = document.getElementById('playIcon');
@@ -79,8 +88,12 @@ function onYoutubePlayerReady(event) {
 
     const volumeSlider = document.getElementById('volumeSlider');
     const volumeIcon = document.getElementById('volumeIcon');
-    const initialVolume = 50;
+    let initialVolume = getLocalStorageItem('currentVolume');
+    if(!initialVolume) {
+        initialVolume = 50;
+    }
     volumeSlider.value = initialVolume;
+    youtubePlayer.setVolume(initialVolume);
     
     // Ändern der Lautstärke, wenn der Slider bewegt wird
     volumeSlider.addEventListener('input', function() {
@@ -178,7 +191,6 @@ function startNextSong(timeStamp = 0) {
 }
 
 function getYouTubeVideoId(url) {
-    console.log(url);
 	//const match = url.match(/(?:watch\?v=|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
     const match = url.match(/(?:watch\?.*?&?v=|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
     return match ? match[1] : null;

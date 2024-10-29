@@ -3,7 +3,6 @@ function importTemplates() {
         $.ajax({
             url: "station",
             success: function(data){
-                console.log(data);
                 let stations = [];
 
                 $(data).find("img[alt='[DIR]']").closest("tr").find("a").each(function() {
@@ -35,6 +34,8 @@ function importTemplates() {
 
 // In externen Funktion durchlaufen, da sonst die korrekte Reihenfolge nicht gegegeben ist und das Thumbnail nicht zum Inhalt passen könnte
 async function loadStations(stations) {
+    const previousStations = getLocalStorageItem('arrStations');
+
     for (const [index, station] of stations.entries()) {
         const firstItem = index === 0;
 
@@ -49,15 +50,19 @@ async function loadStations(stations) {
         
         try {
             const songs = await fetchJSON(`station/${station}/songlist.json`);
+            let currentSong = songs[0].url;
+            if(previousStations && previousStations.length > 0) {
+                const previousStationObject = previousStations.find(stationObj => stationObj.stationName === station);
+                if (previousStationObject) {
+                    currentSong = previousStationObject.currentSong;
+                }
+            }
             const stationObject = {
                 stationName: station,
                 stationSongs: songs,
-                currentSong: songs[0].url
+                currentSong: currentSong
             };
             arrStations.push(stationObject);
-            if(firstItem) {
-                startStation(station);
-            }
         } catch(error) {
             alert(`Songliste von ${station} konnte nicht geladen werden.`);
         }

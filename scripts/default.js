@@ -4,6 +4,19 @@ $(document).ready(function() {
     checkPermissions();
     importTemplates();
     initCarousel();
+
+    window.addEventListener("beforeunload", function(e){
+        saveCurrentSong();  // Aktuellen Song und Position speichern
+        setLocalStorageItem('arrStations', arrStations);    // Speichern, um beim Start wieder auszulesen bei welchem Song und an welcher Stelle man war
+        const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
+        const station = activeSlide.querySelector('#stationTitle').innerHTML;
+        setLocalStorageItem('activeStation', station);  // Speichern, um beim Start wieder auszulesen bei welchem Sender
+        let volume = parseInt(document.getElementById('volumeSlider').value);
+        if(volume === 0) {
+            volume = parseInt(document.getElementById('volumeSlider').oldvalue); // Falls der Player gemutet ist, die vorherige Lautstärke auslesen, um Verwirrung beim Start zu verhindern
+        }
+        setLocalStorageItem('currentVolume',  volume);  // Speichern, um die Lautstärke beim Start wieder auszulesen
+     });
 });
 
 function checkPermissions() {

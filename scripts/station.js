@@ -1,8 +1,6 @@
 const arrStations = [];
-let stationLoaded = false;
 
 function startStation(station) {
-    console.log(arrStations);
     document.title = `${station} - Nosteradio 2.0`;
 
     songQueue = [];
@@ -14,14 +12,9 @@ function startStation(station) {
             songQueue.push(getYouTubeVideoId(song.url));
             songQueueOrig.push(getYouTubeVideoId(song.url));
         }
-        stationLoaded = true;
-        console.log(songQueue);
-        console.log(youtubePlayer);
         if(youtubePlayerLoaded) {
             const currentVideoId = getYouTubeVideoId(stationObject.currentSong);
             let timeStamp = getParam('t', stationObject.currentSong);
-            console.log(stationObject.currentSong);
-            console.log(timeStamp);
             if(timeStamp) {
                 try {
                     timeStamp = parseInt(timeStamp);
@@ -51,8 +44,6 @@ function startStation(station) {
 function setSongTitle(videoData) {
     const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
     const station = activeSlide.querySelector('#stationTitle').innerHTML;
-    console.log(activeSlide);
-    console.log(videoData);
 
     const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
     if (stationObject) {
@@ -84,8 +75,6 @@ function saveCurrentSong() {
     const currentSong = youtubePlayer.getVideoUrl();    // Liefert die aktuelle Zeit nicht zuverlässig. Also Link mit Timestamp selbst zusammenbauen
     const currentTime = youtubePlayer.getCurrentTime();
     const currentVideoId = getYouTubeVideoId(currentSong);
-    console.log('currentSong', currentSong);
-    console.log('currentTime', currentTime);
 
     const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
     if (stationObject) {
