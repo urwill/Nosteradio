@@ -1,4 +1,3 @@
-const initialVideoID = '_qSNa9Tlrjk';
 let youtubePlayer;
 let songQueueOrig = [];
 let songQueue = [];
@@ -17,9 +16,6 @@ function initYoutubePlayer() {
 
 function onYouTubeIframeAPIReady() {	
 	youtubePlayer = new YT.Player('youtubePlayer', {
-		height: '204',
-		width: '362',
-		videoId: initialVideoID,
 		events: {
 			'onReady': onYoutubePlayerReady,
 			'onStateChange': onYoutubePlayerStateChange,
@@ -36,6 +32,10 @@ function onYoutubePlayerReady(event) {
         const carousel = new bootstrap.Carousel('#stationCarousel');
         const index = arrStations.findIndex(stationObj => stationObj.stationName === station);
         carousel.to(index);
+        if(index === 0) {
+            // Carousel war schon auf dem gewünschten Slide, weshalb kein Event ausgelöst wird
+            startStation(station);  // also manuell starten
+        }
 
     } else {
         const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');

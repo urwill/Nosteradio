@@ -76,10 +76,14 @@ function saveCurrentSong() {
     const currentTime = youtubePlayer.getCurrentTime();
     const currentVideoId = getYouTubeVideoId(currentSong);
 
-    const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
-    if (stationObject) {
-        stationObject.currentSong = `https://youtube.com/watch?t=${currentTime}&v=${currentVideoId}`;
+    if(currentVideoId) {
+        const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
+        if (stationObject) {
+            stationObject.currentSong = `https://youtube.com/watch?t=${currentTime}&v=${currentVideoId}`;
+        } else {
+            console.log(`Kein Objekt mit stationName ${station} gefunden.`);
+        }
     } else {
-        console.log(`Kein Objekt mit stationName ${station} gefunden.`);
+        // Kein Song gefunden, weil der Player noch leer war. In diesem Fall würde sonst ein "leerer" Song in currentSong gespeichert werden
     }
 }
