@@ -1,15 +1,13 @@
 function importTemplates() {
-    if(location.host + location.pathname === 'localhost/apps/Nosteradio/x') {
+    if(location.host + location.pathname === 'localhost/apps/Nosteradio/') {
         $.ajax({
             url: "station",
             success: function(data){
+                console.log(data);
                 let stations = [];
-    
-                $(data).find('a[href]').filter(function() {
-                    return $(this).attr("href") === $(this).text();
-                }).each(function(index) {
-                    const stationURL = $(this).attr("href");
-                    const stationName = stationURL.slice(0, -1);
+
+                $(data).find("img[alt='[DIR]']").closest("tr").find("a").each(function() {
+                    const stationName = $(this).text().replace('/', '');
                     stations.push(stationName);
                 }).promise().done(function() {
                     if(isStorageAvailable) {
@@ -48,8 +46,9 @@ async function loadStations(stations) {
 
         await fetchAndInsertHtml('./html/station.html', dynamicData, document.getElementById('stationCarouselInner'));
         await fetchAndInsertHtml('./html/thumbnail.html', dynamicData, document.getElementById('stationCarouselIndicators'));
-    
-        $.getJSON(`station/${station}/songlist.json`, function(songs){
+        
+        try {
+            const songs = await fetchJSON(`station/${station}/songlist.json`);
             const stationObject = {
                 stationName: station,
                 stationSongs: songs,
@@ -59,15 +58,16 @@ async function loadStations(stations) {
             if(firstItem) {
                 startStation(station);
             }
-        }).fail(function(){
-            alert(`Songliste von ${station} konnte nicht geladen werden.`)
-        });
+        } catch(error) {
+            alert(`Songliste von ${station} konnte nicht geladen werden.`);
+        }
     }
 
     await fetchAndInsertHtml('./html/controls.html', {}, document.getElementById('stationCarouselInner'));
+    initYoutubePlayer();
 }
 
-// Eine Funktion, die eine HTML-Datei holt und einfügt
+// Eine Funktion, die eine HTML-Datei ausliest und einfügt
 function fetchAndInsertHtml(url, data, parentElem) {
     return new Promise((resolve, reject) => {
         fetch(url)
@@ -91,5 +91,19 @@ function fetchAndInsertHtml(url, data, parentElem) {
             .catch(error => {
                 reject(error);
             });
+    });
+}
+
+// Eine Funktion, die eine JSON-Datei ausliest und diese zurückgibt
+function fetchJSON(url) {
+    return new Promise((resolve, reject) => {
+        fetch(url)
+        .then(response => response.json())
+        .then(json => {
+            resolve(json);
+        })
+        .catch(error => {
+            reject(error);
+        });
     });
 }

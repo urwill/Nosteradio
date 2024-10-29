@@ -4,7 +4,6 @@ $(document).ready(function() {
     checkPermissions();
     importTemplates();
     initCarousel();
-    initYoutubePlayer();
 });
 
 function checkPermissions() {

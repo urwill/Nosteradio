@@ -161,6 +161,9 @@ function onYoutubePlayerError(event) {
 }
 
 function startNextSong(timeStamp = 0) {
+    const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
+    activeSlide.querySelector('#currentSong').innerHTML = 'Loading...';
+
     if(songQueue.length > 0) {
         const videoId = songQueue.shift();
         videoStarted = false;
