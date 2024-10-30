@@ -43,7 +43,7 @@ function startStation(station) {
 
 function setSongTitle(videoData) {
     const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
-    const station = activeSlide.querySelector('#stationTitle').innerHTML;
+    const station = activeSlide.querySelector('#stationTitle').getAttribute('data-title');
 
     const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
     if (stationObject) {
@@ -57,7 +57,9 @@ function setSongTitle(videoData) {
                 if(!title) {
                     title = videoData.title;
                 }
-                activeSlide.querySelector('#currentSong').innerHTML = `${artist} - ${title}`;
+                const currentSongElem = activeSlide.querySelector('#currentSong');
+                currentSongElem.innerHTML = `${artist} - ${title}`;
+                marquee(currentSongElem);
                 return;
             }
         }
@@ -70,7 +72,7 @@ function setSongTitle(videoData) {
 
 function saveCurrentSong() {
     const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
-    const station = activeSlide.querySelector('#stationTitle').innerHTML;
+    const station = activeSlide.querySelector('#stationTitle').getAttribute('data-title');
     //alert(station);
     const currentSong = youtubePlayer.getVideoUrl();    // Liefert die aktuelle Zeit nicht zuverlässig. Also Link mit Timestamp selbst zusammenbauen
     const currentTime = youtubePlayer.getCurrentTime();

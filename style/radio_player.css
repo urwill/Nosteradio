@@ -27,3 +27,11 @@
     position: absolute;
     bottom: 6%;
 }
+
+.marquee {
+    overflow: hidden;
+}
+
+.marquee > * {
+    white-space: nowrap;
+}

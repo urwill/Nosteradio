@@ -3,10 +3,11 @@ function importTemplates() {
         $.ajax({
             url: "station",
             success: function(data){
+                console.log(data);
                 let stations = [];
 
                 $(data).find("img[alt='[DIR]']").closest("tr").find("a").each(function() {
-                    const stationName = $(this).text().replace('/', '');
+                    const stationName = decodeURI($(this).attr('href')).replace('/', '');
                     stations.push(stationName);
                 }).promise().done(function() {
                     if(isStorageAvailable) {
@@ -69,6 +70,14 @@ async function loadStations(stations) {
     }
 
     await fetchAndInsertHtml('./html/controls.html', {isLocal: isLocal}, document.getElementById('stationCarouselInner'));
+
+    for(const stationTitle of document.querySelectorAll('#stationTitle')) {
+        marquee(stationTitle);
+    }
+
+    const thumbnailHeight = document.getElementById('stationCarouselIndicators').offsetHeight;
+    document.querySelector('.carousel-control-prev').style.marginTop = `-${thumbnailHeight}px`;
+    document.querySelector('.carousel-control-next').style.marginTop = `-${thumbnailHeight}px`;
     initYoutubePlayer();
 }
 

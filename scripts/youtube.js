@@ -39,7 +39,7 @@ function onYoutubePlayerReady(event) {
 
     } else {
         const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
-        station = activeSlide.querySelector('#stationTitle').innerHTML;
+        station = activeSlide.querySelector('#stationTitle').getAttribute('data-title');
         startStation(station);
     }
 
@@ -170,11 +170,12 @@ function onYoutubePlayerStateChange(event) {
 }
 
 function onYoutubePlayerError(event) {
-	
+	startNextSong();    // Es wird zwar vorab geprüft, dass jeder Song funktioniert, aber wenn sich nachträglich etwas ändert, nicht abspielbare Songs überspringen
 }
 
 function startNextSong(timeStamp = 0) {
     const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
+    removeMarquee(activeSlide.querySelector('#currentSong'));
     activeSlide.querySelector('#currentSong').innerHTML = 'Loading...';
 
     if(songQueue.length > 0) {

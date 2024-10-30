@@ -6,7 +6,7 @@ function initCarousel() {
     });
 
     stationCarouselElem.addEventListener('slid.bs.carousel', event => {
-        const station = event.relatedTarget.querySelector('#stationTitle').innerHTML;
+        const station = event.relatedTarget.querySelector('#stationTitle').getAttribute('data-title');
         startStation(station);
     });
 }

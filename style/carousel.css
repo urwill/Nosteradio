@@ -1,10 +1,11 @@
 #stationContainer {
-	width: 960px;
+	width: 800px;
+  margin: 0 auto;
 }
 
 .carousel-indicators button.thumbnail {
     width: 200px;
-    height: 112.5px;
+    height: 100%;
 	background-color: #eee !important;
   }
   .carousel-indicators button.thumbnail:not(.active) {
@@ -22,12 +23,10 @@
   
   .carousel-control-prev {
     margin-left: -3%;    /* Neben das Banner positionieren */
-    margin-top: -112.5px;   /* Nach oben verschieben, um die Thumbnails auszugleichen */
   }
   
   .carousel-control-next {
     margin-right: -3%;    /* Neben das Banner positionieren */
-    margin-top: -112.5px;   /* Nach oben verschieben, um die Thumbnails auszugleichen */
   }
 
 /* Die Farben von selbst erstellten Icons im Darkmode invertieren, da das nicht automatisch geschieht, wie bei Font Awesome Icons */
