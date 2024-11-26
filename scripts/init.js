@@ -1,40 +1,20 @@
-function importTemplates() {
-    if(location.host + location.pathname === 'localhost/apps/Nosteradio/') {
-        $.ajax({
-            url: "station",
-            success: function(data){
-                console.log(data);
-                let stations = [];
-
-                $(data).find("img[alt='[DIR]']").closest("tr").find("a").each(function() {
-                    const stationName = decodeURI($(this).attr('href')).replace('/', '');
-                    stations.push(stationName);
-                }).promise().done(function() {
-                    if(isStorageAvailable) {
-                        const storageStations = getLocalStorageItem('stations');
-                        if(JSON.stringify(stations) !== JSON.stringify(storageStations)) {
-                            setLocalStorageItem('stations', stations);
-                            const blob = new Blob([JSON.stringify(stations)], { type: "text/json" });
-                            downloadFile(blob, 'stations.json');
-                        }
-                    } else {
-                        downloadFile(blob, 'stations.json');
-                    }
-                    loadStations(stations);
-                });
-            }
+async function importTemplates() {
+    const stationsInOPFS = await doesPathExist(['station']);
+    if(!stationsInOPFS) {
+        $.getJSON(`station/stations.json`, function(stations) {
+            stationListToOPFS(stations);
+            loadStations();
+        }).fail(function(){
+            alert(`Sender-Liste konnte nicht geladen werden.`)
         });
     } else {
-        $.getJSON(`station/stations.json`, function(stations){
-            loadStations(stations);
-        }).fail(function(){
-            alert(`Stations-Liste konnte nicht geladen werden.`)
-        });
+        loadStations();
     }
 }
 
 // In externen Funktion durchlaufen, da sonst die korrekte Reihenfolge nicht gegegeben ist und das Thumbnail nicht zum Inhalt passen könnte
-async function loadStations(stations) {
+async function loadStations() {
+    const stations = await getSubdirectories('station');
     const previousStations = getLocalStorageItem('arrStations');
 
     for (const [index, station] of stations.entries()) {
@@ -70,6 +50,11 @@ async function loadStations(stations) {
     }
 
     await fetchAndInsertHtml('./html/controls.html', {isLocal: isLocal}, document.getElementById('stationCarouselInner'));
+    const navBarData = {
+        appName: APP_NAME,
+        theme: getTheme()
+    };
+    await fetchAndInsertHtml('./html/navBar.html', navBarData, document.body, 'afterbegin');
 
     for(const stationTitle of document.querySelectorAll('#stationTitle')) {
         marquee(stationTitle);
@@ -82,7 +67,7 @@ async function loadStations(stations) {
 }
 
 // Eine Funktion, die eine HTML-Datei ausliest und einfügt
-function fetchAndInsertHtml(url, data, parentElem) {
+function fetchAndInsertHtml(url, data, parentElem, insertAt = 'beforeend') {
     return new Promise((resolve, reject) => {
         fetch(url)
             .then(response => response.text())
@@ -99,7 +84,7 @@ function fetchAndInsertHtml(url, data, parentElem) {
                 });
 
                 // Füge das HTML mit ersetzen Platzhaltern ein
-                parentElem.insertAdjacentHTML('beforeend', html);
+                parentElem.insertAdjacentHTML(insertAt, html);
                 resolve();
             })
             .catch(error => {
@@ -115,6 +100,20 @@ function fetchJSON(url) {
         .then(response => response.json())
         .then(json => {
             resolve(json);
+        })
+        .catch(error => {
+            reject(error);
+        });
+    });
+}
+
+// Eine Funktion, die eine Datei ausliest und diese zurückgibt
+function fetchFileBlob(url) {
+    return new Promise((resolve, reject) => {
+        fetch(url)
+        .then(response => response.blob())
+        .then(file => {
+            resolve(file);
         })
         .catch(error => {
             reject(error);

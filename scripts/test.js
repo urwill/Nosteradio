@@ -2,7 +2,14 @@ const isLocal = location.host + location.pathname === 'localhost/apps/Nosteradio
 let testYoutubePlayer;
 let allSongs = [];
 
-function test() {
+async function test() {
+    //readFileFromFolder(['myRadio', 'Logo.png']);
+    //await clearDirectory();
+    await listDirectory();
+    getSubdirectories('station');
+}
+
+function testLinks() {
     if(testYoutubePlayer) {
         onTestYoutubePlayerReady();
     } else {

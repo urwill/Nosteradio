@@ -1,7 +1,10 @@
+const DEFAULT_APP_NAME = 'Nosteradio';
+let APP_NAME = DEFAULT_APP_NAME;
 let isStorageAvailable = false;
 
-$(document).ready(function() { 
+$(document).ready(function() {
     checkPermissions();
+    loadTheme();
     importTemplates();
     initCarousel();
 

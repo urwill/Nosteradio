@@ -1,6 +1,7 @@
 #stationContainer {
 	width: 800px;
   margin: 0 auto;
+  padding-top: 3%;
 }
 
 .carousel-indicators button.thumbnail {

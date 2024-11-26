@@ -1,7 +1,7 @@
 const arrStations = [];
 
 function startStation(station) {
-    document.title = `${station} - Nosteradio 2.0`;
+    document.title = `${station} - ${APP_NAME}`;
 
     songQueue = [];
     songQueueOrig = [];
