@@ -41,19 +41,29 @@ async function saveFileToFolder(pathParts, blob) {
 }
 
 async function readFileFromFolder(pathParts) {
-    let currentDir = await navigator.storage.getDirectory();
+    try {
+        let currentDir = await navigator.storage.getDirectory();
 
-    // Ordnerstruktur durchlaufen
-    for (let i = 0; i < pathParts.length - 1; i++) {
-        currentDir = await currentDir.getDirectoryHandle(pathParts[i]);
+        // Ordnerstruktur durchlaufen
+        for (let i = 0; i < pathParts.length - 1; i++) {
+            currentDir = await currentDir.getDirectoryHandle(pathParts[i]);
+        }
+
+        // Datei im letzten Ordner abrufen
+        const fileHandle = await currentDir.getFileHandle(pathParts.at(-1));
+        const file = await fileHandle.getFile();
+
+        console.log(`Datei ${pathParts.join("/")} gelesen.`);
+        return file;
+    } catch (error) {
+        if (error.name === "NotFoundError") {
+            console.warn(`Die Datei "${pathParts.at(-1)}" existiert nicht.`);
+            return null; // Alternative Rückgabe, z.B. `null`
+        } else {
+            console.error("Fehler beim Lesen der Datei:", error);
+            throw error; // Andere Fehler weiterwerfen
+        }
     }
-
-    // Datei im letzten Ordner abrufen
-    const fileHandle = await currentDir.getFileHandle(pathParts.at(-1));
-    const file = await fileHandle.getFile();
-
-    console.log(`Datei ${pathParts.join("/")} gelesen.`);
-    return file;
 }
 
 async function createFolder(folderName, directoryHandle = null) {
@@ -120,10 +130,48 @@ async function getSubdirectories(subfolderName) {
     }
 }
 
+async function getDirectoryFiles(folderName) {
+    try {
+        const rootDirectory = await navigator.storage.getDirectory();
+        const subDirectory = await rootDirectory.getDirectoryHandle(folderName);
+        const files = [];
+
+        for await (const entry of subDirectory.values()) {
+            if (entry.kind === "file") {
+                files.push(entry.name); // Nur die Namen der Dateien speichern
+            }
+        }
+        console.log(`Dateien in ${folderName}:`, files);
+        return files;
+    } catch (error) {
+        if (error.name === "NotFoundError") {
+            console.error(`Das Verzeichnis ${folderName} existiert nicht.`);
+        } else {
+            console.error("Fehler:", error);
+        }
+    }
+}
+
 async function clearDirectory(directoryHandle = null) {
     // Falls kein Handle übergeben wurde, starte im Root-Verzeichnis
     if (!directoryHandle) {
         directoryHandle = await navigator.storage.getDirectory();
+    }
+
+    if (directoryHandle instanceof Array) {
+        const pathParts = directoryHandle;
+        directoryHandle = await navigator.storage.getDirectory();
+        // Ordnerstruktur durchlaufen
+        for (let i = 0; i < pathParts.length; i++) {
+            try {
+                directoryHandle = await directoryHandle.getDirectoryHandle(pathParts[i]);
+            } catch (error) {
+                if (error.name === "NotFoundError") {   // Pfad existiert nicht
+                    console.error(`Ordner ${pathParts[i]} existiert nicht.`);
+                    return; 
+                }
+            }
+        }
     }
 
     for await (const entry of directoryHandle.values()) {

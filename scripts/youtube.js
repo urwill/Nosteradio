@@ -76,7 +76,7 @@ function onYoutubePlayerReady(event) {
                     songQueue.shift();
                 }
 
-                alert('Vorherigen Song nicht gefunden.')
+                bsAlert('Vorherigen Song nicht gefunden.', alertType.danger, false);
             }
         }
     });

@@ -1,12 +1,14 @@
 const isLocal = location.host + location.pathname === 'localhost/apps/Nosteradio/';
 let testYoutubePlayer;
 let allSongs = [];
+let songCount = 0;
 
 async function test() {
     //readFileFromFolder(['myRadio', 'Logo.png']);
-    //await clearDirectory();
+    //await clearDirectory(['station', 'MCM']);
     await listDirectory();
-    getSubdirectories('station');
+    //const file = await readFileFromFolder(['station', 'Test', 'songlist.json']);
+    //getSubdirectories('station');
 }
 
 function testLinks() {
@@ -23,7 +25,7 @@ function testLinks() {
     }
 }
 
-function onTestYoutubePlayerReady(event) {
+async function onTestYoutubePlayerReady(event) {
     allSongs = [];
 
     for(const stationObject of arrStations) {
@@ -35,11 +37,13 @@ function onTestYoutubePlayerReady(event) {
     }
 
     if(allSongs.length > 0) {
+        songCount = allSongs.length;
+        await startProcessing();
         const videoId = allSongs.shift();
         testYoutubePlayer.mute();
         testYoutubePlayer.loadVideoById(videoId);
     } else {
-        alert('Keine Songs vorhanden.');
+        bsAlert('Keine Songs vorhanden.', alertType.info, false);
     }
 }
 
@@ -81,19 +85,20 @@ loop2:
     }
 
     if(foundId) {
-        alert(`Song konnte nicht geladen werden:\n${title}${artist}Link: https://youtube.com/watch?v=${videoId}`);
+        bsAlert(`Song konnte nicht geladen werden:\n${title}${artist}Link: https://youtube.com/watch?v=${videoId}`, alertType.danger, false);
     } else {
-        alert(`Song konnte nicht geladen werden: https://youtube.com/watch?v=${videoId}`);
+        bsAlert(`Song konnte nicht geladen werden: https://youtube.com/watch?v=${videoId}`, alertType.danger, false);
     }
     testNextSong();
 }
 
-function testNextSong() {
+async function testNextSong() {
+    await updateProgress(songCount - allSongs.length - 1, songCount);
     if(allSongs.length > 0) {
         const videoId = allSongs.shift();
         testYoutubePlayer.loadVideoById(videoId);
     } else {
         testYoutubePlayer.pauseVideo();
-        alert('Fertig.');
+        bsAlert('Prüfung abgeschlossen', alertType.success);
     }
 }

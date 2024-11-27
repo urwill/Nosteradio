@@ -20,7 +20,7 @@ function startStation(station) {
                     timeStamp = parseInt(timeStamp);
                 }
                 catch(err) {
-                    alert(err.message);
+                    bsAlert(err.message, alertType.danger, false);
                 }
             }
             while(songQueue.length > 0) {

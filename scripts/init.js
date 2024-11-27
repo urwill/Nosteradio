@@ -1,14 +1,13 @@
 async function importTemplates() {
     const stationsInOPFS = await doesPathExist(['station']);
-    if(!stationsInOPFS) {
+    if(stationsInOPFS) {
+        loadStations();
+    } else {
         $.getJSON(`station/stations.json`, function(stations) {
             stationListToOPFS(stations);
-            loadStations();
         }).fail(function(){
-            alert(`Sender-Liste konnte nicht geladen werden.`)
+            bsAlert(`Sender-Liste konnte nicht geladen werden.`, alertType.danger, false);
         });
-    } else {
-        loadStations();
     }
 }
 
@@ -17,20 +16,52 @@ async function loadStations() {
     const stations = await getSubdirectories('station');
     const previousStations = getLocalStorageItem('arrStations');
 
+    let radio = await readFileFromFolder(['station', 'radio.json']);
+    if(radio) {
+        radio = await radio.text();
+        radio = JSON.parse(radio);
+
+        if(radio.title) {
+            APP_NAME = radio.title;
+        }
+    }
+    const navBarData = {
+        appName: APP_NAME,
+        localhost: (location.host === 'localhost')
+    };
+    await fetchAndInsertHtml('./html/navBar.html', navBarData, document.body, 'afterbegin');
+    document.getElementById('selectTheme').value = getTheme();
+
+    // Kann es oben nicht machen, weil da die Navbar noch nicht geladen ist
+    if(radio) {
+        if(radio.logo) {
+            const logoFile = await readFileFromFolder(['station', radio.logo]);
+            if(logoFile) {
+                document.getElementById('favicon').setAttribute('href', URL.createObjectURL(logoFile));
+                document.getElementById('navBarLogo').src = URL.createObjectURL(logoFile);
+            }
+        }
+    }
+
     for (const [index, station] of stations.entries()) {
         const firstItem = index === 0;
 
         const dynamicData = {
             stationName: station,
             firstItem: firstItem,
-            index: index
+            index: index,
+            banner: URL.createObjectURL(await readFileFromFolder(['station', station, 'banner.png']))
         };
 
         await fetchAndInsertHtml('./html/station.html', dynamicData, document.getElementById('stationCarouselInner'));
         await fetchAndInsertHtml('./html/thumbnail.html', dynamicData, document.getElementById('stationCarouselIndicators'));
         
         try {
-            const songs = await fetchJSON(`station/${station}/songlist.json`);
+            const file = await readFileFromFolder(['station', station, 'songlist.json']);
+            const text = await file.text();
+            // JSON parsen
+            const songs = JSON.parse(text);
+            //const songs = await fetchJSON(`station/${station}/songlist.json`);
             let currentSong = songs[0].url;
             if(previousStations && previousStations.length > 0) {
                 const previousStationObject = previousStations.find(stationObj => stationObj.stationName === station);
@@ -45,16 +76,11 @@ async function loadStations() {
             };
             arrStations.push(stationObject);
         } catch(error) {
-            alert(`Songliste von ${station} konnte nicht geladen werden.`);
+            bsAlert(`Songliste von ${station} konnte nicht geladen werden.`, alertType.danger, false);
         }
     }
 
     await fetchAndInsertHtml('./html/controls.html', {isLocal: isLocal}, document.getElementById('stationCarouselInner'));
-    const navBarData = {
-        appName: APP_NAME,
-        theme: getTheme()
-    };
-    await fetchAndInsertHtml('./html/navBar.html', navBarData, document.body, 'afterbegin');
 
     for(const stationTitle of document.querySelectorAll('#stationTitle')) {
         marquee(stationTitle);

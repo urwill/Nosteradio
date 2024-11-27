@@ -1,7 +1,7 @@
 <nav class="navbar bg-body-tertiary sticky-top">
     <div class="container-fluid">
         <a class="navbar-brand" href=".">
-            <img src="images/Logo.png" alt=""
+            <img id="navBarLogo" src="images/Logo.png" alt=""
                 style="height: var(--bs-navbar-brand-font-size); margin-right: 5px; margin-top: -0.25rem;">{appName}
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
@@ -18,8 +18,7 @@
                     <div class="col">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-circle-half"></i></span>
-                            <select class="form-select" id="selectTheme" onchange="setTheme(this.value);"
-                                value="{theme}">
+                            <select class="form-select" id="selectTheme" onchange="setTheme(this.value);">
                                 <option value="system">Systemeinstellung übernehmen</option>
                                 <option value="dark">Dark Mode</option>
                                 <option value="light">Light Mode</option>
@@ -39,12 +38,31 @@
                 <div class="row mt-3">
                     <div class="col">
                         <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-music-note-list"></i></span>
+                            <button type="button" class="btn btn-primary flex-fill border-end"
+                                onclick="uploadFile(generateSonglist, '.zip');">Songlist generieren</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-shield-fill-check"></i></span>
                             <button type="button" class="btn btn-primary flex-fill border-end"
                                 onclick="testLinks();">Songs prüfen</button>
                         </div>
                     </div>
                 </div>
+
+                {#localhost}<div class="row mt-3">
+                    <div class="col">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-check-circle-fill"></i></span>
+                            <button type="button" class="btn btn-primary flex-fill border-end"
+                                onclick="test();">Test</button>
+                        </div>
+                    </div>
+                </div>{/localhost}
             </div>
         </div>
     </div>
