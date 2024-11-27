@@ -54,9 +54,12 @@ async function zipToOPFS(file, rootDirectory) {
     }
     
     try {
+        await startProcessing();
         const blobReader = new zip.BlobReader(file);
         const zipReader = new zip.ZipReader(blobReader);
         const entries = await zipReader.getEntries();
+        const totalEntries = entries.length;
+        let currentEntry = 0;
 
         for (const entry of entries) {
             if (!entry.directory) {
@@ -67,6 +70,8 @@ async function zipToOPFS(file, rootDirectory) {
                 const pathParts = (rootDirectory + entry.filename).split("/");
                 await saveFileToFolder(pathParts, blob);
             }
+            await updateProgress(currentEntry, totalEntries);
+            currentEntry++;
         }
 
         await zipReader.close();
