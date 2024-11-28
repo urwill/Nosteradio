@@ -133,6 +133,8 @@ function pause() {
 }
 
 async function startNextSong(timeStamp = 0) {
+    pause();    // Player anhalten, damit nicht z.B. Youtube weiterläuft, wenn man auf einen lokalen Song wechselt
+    
     const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
     removeMarquee(activeSlide.querySelector('#currentSong'));
     activeSlide.querySelector('#currentSong').innerHTML = 'Loading...';
