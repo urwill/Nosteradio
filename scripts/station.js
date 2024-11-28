@@ -1,6 +1,91 @@
 const arrStations = [];
 
+function initStation() {
+    let station = getLocalStorageItem('activeStation');
+    if(station) {
+        const carousel = new bootstrap.Carousel('#stationCarousel');
+        const index = arrStations.findIndex(stationObj => stationObj.stationName === station);
+        if(index === -1) {    // activeStation nicht in arrStations gefunden
+            const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
+            station = activeSlide.querySelector('#stationTitle').getAttribute('data-title');
+            startStation(station);
+        } else {
+            carousel.to(index);
+            if(index === 0) {
+                // Carousel war schon auf dem gewünschten Slide, weshalb kein Event ausgelöst wird
+                startStation(station);  // also manuell starten
+            }
+        }
+    } else {
+        const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
+        station = activeSlide.querySelector('#stationTitle').getAttribute('data-title');
+        startStation(station);
+    }
+
+    const playIcon = document.getElementById('playIcon');
+    playIcon.addEventListener("click", function() {
+        playIcon_clicked(this);
+    });
+
+    const rewindIcon = document.getElementById('rewindIcon');
+    rewindIcon.addEventListener("click", function() {
+        rewindIcon_clicked();
+    });
+
+    const forwardIcon = document.getElementById('forwardIcon');
+    forwardIcon.addEventListener("click", function() {
+        startNextSong();
+    });
+
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeIcon = document.getElementById('volumeIcon');
+    let initialVolume = getLocalStorageItem('currentVolume');
+    if(!initialVolume) {
+        initialVolume = 50;
+    }
+    volumeSlider.value = initialVolume;
+    setVolume(initialVolume);
+    
+    // Ändern der Lautstärke, wenn der Slider bewegt wird
+    volumeSlider.addEventListener('input', function() {
+        let volume = parseInt(this.value);
+
+        setVolume(volume);
+        if(volume > 0) {
+            mute(false);   // Player wieder unmuten, falls er beim Songwechsel gemutet und wegen User-Einstellungen nicht entmutet wurde
+        }
+
+        switch (true) {
+            case (volume === 0):
+                volumeIcon.className = 'playerControl bi bi-volume-mute-fill';
+                break;
+            case (volume > 50):
+                volumeIcon.className = 'playerControl bi bi-volume-up-fill';
+                break;
+            default:
+                volumeIcon.className = 'playerControl bi bi-volume-down-fill';
+                break;
+        }
+    });
+
+	// Mute/Unmute, wenn man auf das Icon klickt
+    volumeIcon.addEventListener('click', function() {
+        let volume = parseInt(volumeSlider.value);
+        
+        if(volume === 0) {
+            volumeSlider.value = volumeSlider.oldvalue;
+        } else {
+            volumeSlider.oldvalue = volume;
+            volumeSlider.value = 0;
+        }
+
+        volumeSlider.dispatchEvent(new Event('input'));
+    });
+}
+
 function startStation(station) {
+    pause();    // Player anhalten, damit nicht z.B. Youtube weiterläuft, wenn man auf einen lokalen Song wechselt
+
     document.title = `${station} - ${APP_NAME}`;
 
     songQueue = [];
@@ -9,32 +94,32 @@ function startStation(station) {
     const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
     if (stationObject) {
         for(const song of stationObject.stationSongs) {
-            songQueue.push(getYouTubeVideoId(song.url));
-            songQueueOrig.push(getYouTubeVideoId(song.url));
+            const videoId = getVideoId(getSong(song));
+            songQueue.push(videoId);
+            songQueueOrig.push(videoId);
         }
-        if(youtubePlayerLoaded) {
-            const currentVideoId = getYouTubeVideoId(stationObject.currentSong);
-            let timeStamp = getParam('t', stationObject.currentSong);
-            if(timeStamp) {
-                try {
-                    timeStamp = parseInt(timeStamp);
-                }
-                catch(err) {
-                    bsAlert(err.message, alertType.danger, false);
-                }
+
+        const currentVideoId = getVideoId(stationObject.currentSong);
+        let timeStamp = stationObject.currentTime || 0;
+        if(timeStamp) {
+            try {
+                timeStamp = parseInt(timeStamp);
             }
-            while(songQueue.length > 0) {
-                if(songQueue[0] === currentVideoId) {
-                    startNextSong(timeStamp);
-                    return;
-                } else {
-                    songQueue.shift();
-                }
+            catch(err) {
+                bsAlert(err.message, alertType.danger, false);
             }
-            if(songQueue.length === 0) {    // Song nicht in Queue gefunden. Eventuell schon neuer Song geladen bevor der alte gespeichert wurde
-                songQueue = JSON.parse(JSON.stringify(songQueueOrig));  // Original-Queue auf aktuelle Queue übertragen ohne Referenz auf das Original
-                startNextSong();
+        }
+        while(songQueue.length > 0) {
+            if(songQueue[0] === currentVideoId) {
+                startNextSong(timeStamp);
+                return;
+            } else {
+                songQueue.shift();
             }
+        }
+        if(songQueue.length === 0) {    // Song nicht in Queue gefunden. Eventuell schon neuer Song geladen bevor der alte gespeichert wurde
+            songQueue = JSON.parse(JSON.stringify(songQueueOrig));  // Original-Queue auf aktuelle Queue übertragen ohne Referenz auf das Original
+            startNextSong();
         }
     } else {
         console.log(`Kein Objekt mit stationName ${station} gefunden.`);
@@ -48,7 +133,8 @@ function setSongTitle(videoData) {
     const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
     if (stationObject) {
         for(const song of stationObject.stationSongs) {
-            if(getYouTubeVideoId(song.url) === videoData.video_id) {
+            const videoId = getVideoId(getSong(song));
+            if(videoId === videoData.video_id) {
                 let artist = song.artist;
                 if(!artist) {
                     artist = videoData.author;
@@ -74,14 +160,14 @@ function saveCurrentSong() {
     const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
     const station = activeSlide.querySelector('#stationTitle').getAttribute('data-title');
     //alert(station);
-    const currentSong = youtubePlayer.getVideoUrl();    // Liefert die aktuelle Zeit nicht zuverlässig. Also Link mit Timestamp selbst zusammenbauen
-    const currentTime = youtubePlayer.getCurrentTime();
-    const currentVideoId = getYouTubeVideoId(currentSong);
+    const currentSong = getCurrentSong();
+    const currentTime = getCurrentTime();
 
-    if(currentVideoId) {
+    if(currentSong) {
         const stationObject = arrStations.find(stationObj => stationObj.stationName === station);
         if (stationObject) {
-            stationObject.currentSong = `https://youtube.com/watch?t=${currentTime}&v=${currentVideoId}`;
+            stationObject.currentSong = currentSong;
+            stationObject.currentTime = currentTime;
         } else {
             console.log(`Kein Objekt mit stationName ${station} gefunden.`);
         }

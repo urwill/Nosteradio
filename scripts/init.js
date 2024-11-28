@@ -27,7 +27,7 @@ async function loadStations() {
     }
     const navBarData = {
         appName: APP_NAME,
-        localhost: (location.host === 'localhost')
+        isLocal: isLocal
     };
     await fetchAndInsertHtml('./html/navBar.html', navBarData, document.body, 'afterbegin');
     document.getElementById('selectTheme').value = getTheme();
@@ -62,17 +62,27 @@ async function loadStations() {
             // JSON parsen
             const songs = JSON.parse(text);
             //const songs = await fetchJSON(`station/${station}/songlist.json`);
-            let currentSong = songs[0].url;
+            let currentSong;
+            let currentTime = 0;
+            if(songs[0].url) {
+                currentSong = songs[0].url;
+            } else {
+                currentSong = songs[0].fileName;
+            }
             if(previousStations && previousStations.length > 0) {
                 const previousStationObject = previousStations.find(stationObj => stationObj.stationName === station);
                 if (previousStationObject) {
                     currentSong = previousStationObject.currentSong;
+                    if(previousStationObject.currentTime) {
+                        currentTime = previousStationObject.currentTime;
+                    }
                 }
             }
             const stationObject = {
                 stationName: station,
                 stationSongs: songs,
-                currentSong: currentSong
+                currentSong: currentSong,
+                currentTime: currentTime
             };
             arrStations.push(stationObject);
         } catch(error) {

@@ -28,6 +28,9 @@
 		<script type="text/javascript" src="scripts/opfs.js"></script>
 		<script type="text/javascript" src="scripts/progressBar.js"></script>
 		<script type="text/javascript" src="scripts/bs-alert.js"></script>
+		<script type="text/javascript" src="scripts/songs.js"></script>
+		<script type="text/javascript" src="scripts/localAudio.js"></script>
+		<script type="text/javascript" src="scripts/generate-songlist.js"></script>
 	</head>
 	<body>
 		<div id="stationContainer">
@@ -52,6 +55,9 @@
 		</div>
 		<div id="youtubePlayer" style="display: none;"></div>
 		<div id="testYoutubePlayer" style="display: none;"></div>
+		<div id="songlistYoutubePlayer" style="display: none;"></div>
+		<audio controls autoplay id="audioPlayer" style="display: none;"></audio>
+		<audio controls autoplay id="testAudioPlayer" style="display: none;"></audio>
 		<div class="modal blocking fade" id="progressModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
 			aria-labelledby="progressModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-centered">

@@ -5,6 +5,7 @@ let isStorageAvailable = false;
 $(document).ready(function() {
     checkPermissions();
     loadTheme();
+    initLocalAudio();
     importTemplates();
     initCarousel();
 
