@@ -29,12 +29,20 @@ function initStation() {
 
     const rewindIcon = document.getElementById('rewindIcon');
     rewindIcon.addEventListener("click", function() {
-        rewindIcon_clicked();
+        if(videoStarted === true) { // Button "deaktivieren" bis Song geladen wurde, da Fehler auftreten können, wenn man schnell durch Songs skippt
+            rewindIcon_clicked();
+        } else {
+            console.log('Bitte warten');
+        }
     });
 
     const forwardIcon = document.getElementById('forwardIcon');
     forwardIcon.addEventListener("click", function() {
-        startNextSong();
+        if(videoStarted === true) { // Button "deaktivieren" bis Song geladen wurde, da Fehler auftreten können, wenn man schnell durch Songs skippt
+            startNextSong();
+        } else {
+            console.log('Bitte warten');
+        }
     });
 
     const volumeSlider = document.getElementById('volumeSlider');

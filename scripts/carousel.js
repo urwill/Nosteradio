@@ -2,7 +2,12 @@ function initCarousel() {
     const stationCarouselElem = document.getElementById('stationCarousel');
 
     stationCarouselElem.addEventListener('slide.bs.carousel', event => {
-        saveCurrentSong();
+        if(videoStarted === true) { // Senderwechsel "deaktivieren" bis Song geladen wurde, da Fehler auftreten können, wenn man schnell durch Songs skippt
+            saveCurrentSong();
+        } else {
+            console.log('Bitte warten');
+            event.preventDefault();
+        }
     });
 
     stationCarouselElem.addEventListener('slid.bs.carousel', event => {

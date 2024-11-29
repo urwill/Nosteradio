@@ -133,6 +133,7 @@ function pause() {
 }
 
 async function startNextSong(timeStamp = 0) {
+    videoStarted = false;
     pause();    // Player anhalten, damit nicht z.B. Youtube weiterläuft, wenn man auf einen lokalen Song wechselt
     
     const activeSlide = document.getElementById('stationCarousel').querySelector('.carousel-item.active');
@@ -141,7 +142,6 @@ async function startNextSong(timeStamp = 0) {
 
     if(songQueue.length > 0) {
         const videoId = songQueue.shift();
-        videoStarted = false;
         if(videoId.includes('.')) { // Wenn es einen Punkt hat, ist es ein Dateiname und keine Youtube VideoId
             currentSongType = 'local';
             mute();   // Player muten, damit im pausierten Zustand der Song nicht erst kurz beginnt bevor er pausiert wird
