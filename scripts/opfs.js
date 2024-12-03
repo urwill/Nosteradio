@@ -1,3 +1,19 @@
+async function supportsOPFS() {
+    // Prüfen, ob 'navigator.storage' und 'getDirectory' verfügbar sind
+    if (navigator.storage && navigator.storage.getDirectory) {
+        try {
+            // Testen, ob das Root-Verzeichnis des OPFS geöffnet werden kann
+            const rootDir = await navigator.storage.getDirectory();
+            return !!rootDir; // true, wenn das Verzeichnis verfügbar ist
+        } catch (error) {
+            console.error("Fehler beim Zugriff auf das OPFS:", error);
+            return false; // OPFS wird nicht unterstützt
+        }
+    } else {
+        return false; // 'navigator.storage' oder 'getDirectory' nicht verfügbar
+    }
+}
+
 async function saveFileToOPFS(fileName, blob) {
     // Zugriff auf den Root-Ordner des OPFS
     const root = await navigator.storage.getDirectory();

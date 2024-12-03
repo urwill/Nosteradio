@@ -1,9 +1,15 @@
 const DEFAULT_APP_NAME = 'Nosteradio';
 let APP_NAME = DEFAULT_APP_NAME;
-let isStorageAvailable = false;
 
 $(document).ready(function() {
-    checkPermissions();
+    startUp();
+});
+
+async function  startUp() {
+    const hasPermissions = await checkPermissions();
+    if(!hasPermissions) {
+        return;
+    }
     loadTheme();
     initLocalAudio();
     importTemplates();
@@ -21,14 +27,27 @@ $(document).ready(function() {
         }
         setLocalStorageItem('currentVolume',  volume);  // Speichern, um die Lautstärke beim Start wieder auszulesen
      });
-});
+}
 
-function checkPermissions() {
+async function checkPermissions() {
+    let isStorageAvailable = false;
+    let isOPFSAvailable = false;
+
     if (storageAvailable("localStorage")) {
         isStorageAvailable = true;
     } else {
-        console.log('localStorage nicht verfügbar', 'Damit die Anwendung ordnungsgemäß funktioniert, muss localStorage verfügbar sein.<br><br>Aktivieren Sie localStorage in Ihrem Browser und klicken Sie dann auf "OK" oder verwenden Sie einen anderen Browser.');
+        //console.log('localStorage nicht verfügbar', 'Damit die Anwendung ordnungsgemäß funktioniert, muss localStorage verfügbar sein.<br><br>Aktivieren Sie localStorage in Ihrem Browser und klicken Sie dann auf "OK" oder verwenden Sie einen anderen Browser.');
+        bsAlert('Damit die Anwendung ordnungsgemäß funktioniert, muss localStorage verfügbar sein.<br><br>Aktivieren Sie localStorage in Ihrem Browser und laden Sie die Seite dann neu oder verwenden Sie einen anderen Browser.', alertType.danger, false);
     }
+
+    if (await supportsOPFS()) {
+        isOPFSAvailable = true;
+    } else {
+        //console.log('Origin private file system nicht verfügbar', 'Damit die Anwendung ordnungsgemäß funktioniert, muss Origin private file system verfügbar sein.<br><br>Aktivieren Sie Origin private file system in Ihrem Browser und klicken Sie dann auf "OK" oder verwenden Sie einen anderen Browser.<br><br>Falls Sie den Browser im privaten Modus verwenden, könnte auch das das Problem sein.');
+        bsAlert('Damit die Anwendung ordnungsgemäß funktioniert, muss Origin private file system verfügbar sein.<br><br>Aktivieren Sie Origin private file system in Ihrem Browser und laden Sie die Seite dann neu oder verwenden Sie einen anderen Browser.<br><br>Falls Sie den Browser im privaten Modus verwenden, könnte auch das das Problem sein.', alertType.danger, false);
+    }
+
+    return isStorageAvailable && isOPFSAvailable;
 }
 
 function downloadFile(blob, fileName) {
