@@ -62,7 +62,11 @@ async function readFileFromFolder(pathParts) {
 
         // Ordnerstruktur durchlaufen
         for (let i = 0; i < pathParts.length - 1; i++) {
-            currentDir = await currentDir.getDirectoryHandle(pathParts[i]);
+            const folders = pathParts[i].split('/');    // Falls Pfade mit / getrennt sind, statt in nem eigenen Eintrag in pathParts zu stehen
+            for(const folder of folders) {
+                currentDir = await currentDir.getDirectoryHandle(folder);
+            }
+            //currentDir = await currentDir.getDirectoryHandle(pathParts[i]);
         }
 
         // Datei im letzten Ordner abrufen
@@ -148,8 +152,11 @@ async function getSubdirectories(subfolderName) {
 
 async function getDirectoryFiles(folderName) {
     try {
-        const rootDirectory = await navigator.storage.getDirectory();
-        const subDirectory = await rootDirectory.getDirectoryHandle(folderName);
+        let subDirectory = await navigator.storage.getDirectory();
+        const folders = folderName.split('/');
+        for(const folder of folders) {
+            subDirectory = await subDirectory.getDirectoryHandle(folder);
+        }
         const files = [];
 
         for await (const entry of subDirectory.values()) {
@@ -166,6 +173,23 @@ async function getDirectoryFiles(folderName) {
             console.error("Fehler:", error);
         }
     }
+}
+
+async function getDirectoryFilesRecursive(directoryHandle, parentPath = "") {
+    const files = [];
+
+    for await (const [name, handle] of directoryHandle.entries()) {
+        const fullPath = parentPath ? `${parentPath}/${name}` : name;
+        if (handle.kind === "file") {
+            files.push(fullPath); // Dateipfad speichern
+        } else if (handle.kind === "directory") {
+            // Rekursiv Unterverzeichnisse durchsuchen
+            const subFiles = await getDirectoryFilesRecursive(handle, fullPath);
+            files.push(...subFiles); // Gefundene Dateien hinzufügen
+        }
+    }
+
+    return files;
 }
 
 async function clearDirectory(directoryHandle = null) {

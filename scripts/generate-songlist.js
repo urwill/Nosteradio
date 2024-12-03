@@ -25,26 +25,37 @@ async function generateSonglist(file) {
 async function generateSonglistLocal(file) {
     await clearDirectory(['songlist']); // Vorherige Einträge löschen, falls vorhanden
     await zipToOPFS(file, 'songlist');
-    const songFiles = await getDirectoryFiles('songlist');
-    songlist = [];
-    for(const songFile of songFiles) {
-        if (songFile.match(/\.(mp3|mp4|flac)$/i)) {
-            try {
-                const metadata = await getAudioMetadata(await readFileFromFolder(['songlist', songFile]));
-                const song = {
-                    fileName: songFile,
-                    artist: metadata.artist || "",  // Falls kein Künstler vorhanden ist
-                    title: metadata.title || songFile.replace(/\.[^/.]+$/, "")   // Falls kein Titel vorhanden ist, Dateinamen nehmen
-                };
-                songlist.push(song);
-            } catch (error) {
-                console.error("Fehler beim Auslesen der Metadaten für " + songFile, error);
-            }
+    let subFolders = await getSubdirectories('songlist');
+    if(subFolders.length === 0)
+    {
+        subFolders = ['songlist'];
+    } else {
+        for(let i = 0; i < subFolders.length; i++) {
+            subFolders[i] = 'songlist/' + subFolders[i];
         }
     }
-    console.log('songlist', songlist);
-    const blob = new Blob([JSON.stringify(songlist, null, 2)], { type: "text/json" });
-    downloadFile(blob, 'songlist.json');
+    for(const subFolder of subFolders) {
+        const songFiles = await getDirectoryFiles(subFolder);
+        songlist = [];
+        for(const songFile of songFiles) {
+            if (songFile.match(/\.(mp3|mp4|flac)$/i)) {
+                try {
+                    const metadata = await getAudioMetadata(await readFileFromFolder([subFolder, songFile]));
+                    const song = {
+                        fileName: songFile,
+                        artist: metadata.artist || "",  // Falls kein Künstler vorhanden ist
+                        title: metadata.title || songFile.replace(/\.[^/.]+$/, "")   // Falls kein Titel vorhanden ist, Dateinamen nehmen
+                    };
+                    songlist.push(song);
+                } catch (error) {
+                    console.error("Fehler beim Auslesen der Metadaten für " + songFile, error);
+                }
+            }
+        }
+        console.log(subFolder, songlist);
+        const blob = new Blob([JSON.stringify(songlist, null, 2)], { type: "text/json" });
+        downloadFile(blob, `${subFolder.replace('/', '_')}.json`);
+    }
 }
 
 async function generateSonglistYoutube(file) {
